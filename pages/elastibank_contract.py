@@ -30,12 +30,9 @@ parameters = {
         "top_k": 40
     }
 
-vertexai.init(project="1059491012611", location="us-central1")
-    
-#we are here referencing our custom fine-tuned model
-model = TextGenerationModel.from_pretrained("text-bison@001")
-model = model.get_tuned_model("projects/1059491012611/locations/us-central1/models/5745671733780676608")
+vertexai.init(project=projid, location="us-central1")
 
+model = TextGenerationModel.from_pretrained("text-bison@001")
 
 # Connect to Elastic Cloud cluster
 def es_connect(cid, user, passwd):
@@ -43,61 +40,7 @@ def es_connect(cid, user, passwd):
     return es
 
 # Search ElasticSearch index and return details on relevant products
-def search_products(query_text):
-
-    # Elasticsearch query (BM25) and kNN configuration for hybrid search
-    query = {
-        "bool": {
-            "must": [{
-                "match": {
-                    "title": {
-                        "query": query_text,
-                        "boost": 1
-                    }
-                }
-            }],
-            "filter": [{
-                "exists": {
-                    "field": "title-vector"
-                }
-            }]
-        }
-    }
-
-    knn = {
-        "field": "title-vector",
-        "k": 1,
-        "num_candidates": 20,
-        "query_vector_builder": {
-            "text_embedding": {
-                "model_id": "sentence-transformers__all-distilroberta-v1",
-                "model_text": query_text
-            }
-        },
-        "boost": 24
-    }
-
-    fields = ["title", "description", "url", "availability", "price", "brand", "product_id"]
-    index = 'home-depot-product-catalog-vector'
-    resp = es.search(index=index,
-                     query=query,
-                     knn=knn,
-                     fields=fields,
-                     size=5,
-                     source=False)
-
-    doc_list = resp['hits']['hits']
-    body = resp['hits']['hits']
-    url = ''
-    for doc in doc_list:
-        #body = body + doc['fields']['description'][0]
-        url = url + "\n\n" +  doc['fields']['url'][0]
-
-    return body, url
-
-# Search ElasticSearch index and return body and URL for crawled docs
 def search_docs(query_text):
-    
 
     # Elasticsearch query (BM25) and kNN configuration for hybrid search
     query = {
@@ -131,19 +74,19 @@ def search_docs(query_text):
         "boost": 24
     }
 
-    fields = ["title", "body_content", "url"]
-    index = 'search-homecraft-ikea'
+    fields = ["title", "body"]
+    index = 'search-bank-transfers'
     resp = es.search(index=index,
                      query=query,
                      knn=knn,
                      fields=fields,
-                     size=1,
+                     size=3,
                      source=False)
 
-    body = resp['hits']['hits'][0]['fields']['body_content'][0]
-    url = resp['hits']['hits'][0]['fields']['url'][0]
+    body = resp['hits']['hits']
 
-    return body, url
+    return body
+
 
 def truncate_text(text, max_tokens):
     tokens = text.split()
@@ -164,8 +107,8 @@ def vertexAI(prompt):
     return response.text
 
 #image = Image.open('homecraft_logo.jpg')
-st.image("https://i.imgur.com/cdjafe0.png", caption=None)
-st.title("HomeCraft Search Bar")
+st.image("https://i.imgur.com/G22hbgZ.png", caption=None)
+st.title("Elastibank Search Bar")
 
 # Main chat form
 with st.form("chat_form"):
@@ -176,9 +119,8 @@ with st.form("chat_form"):
 negResponse = "I'm unable to answer the question based on the information I have from Homecraft dataset."
 if submit_button:
     es = es_connect(cid, cu, cp)
-    resp_products, url_products = search_products(query)
-    resp_docs, url_docs = search_docs(query)
-    prompt = f"question: {query}"
+    resp_docs = search_docs(query)
+    prompt = f"Answer this question: {query}. Leverage these docs to find the answer: {resp_docs}"
     answer = vertexAI(prompt)
     
     if negResponse in answer:

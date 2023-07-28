@@ -77,7 +77,7 @@ def search_docs(query_text):
     }
 
     fields = ["title", "body_content", "url"]
-    index = 'search-homecraft-ikea'
+    index = 'search-bank-info'
     resp = es.search(index=index,
                      query=query,
                      knn=knn,
@@ -85,8 +85,15 @@ def search_docs(query_text):
                      size=1,
                      source=False)
 
-    body = resp['hits']['hits'][0]['fields']['body_content'][0]
-    url = resp['hits']['hits'][0]['fields']['url'][0]
+    #body = resp['hits']['hits'][0]['fields']['body_content'][0]
+    #url = resp['hits']['hits'][0]['fields']['url'][0]
+
+    doc_list = resp['hits']['hits']
+    body = resp['hits']['hits']
+    url = ''
+    for doc in doc_list:
+        #body = body + doc['fields']['description'][0]
+        url = url + "\n\n" +  doc['fields']['url'][0]
 
     return body, url
 
@@ -109,8 +116,8 @@ def vertexAI(prompt):
     return response.text
 
 #image = Image.open('homecraft_logo.jpg')
-st.image("https://i.imgur.com/cdjafe0.png", caption=None)
-st.title("ElastiBank")
+st.image("https://i.imgur.com/G22hbgZ.png", caption=None)
+st.title("ElastiBank Search Bar")
 
 # Main chat form
 with st.form("chat_form"):
@@ -121,14 +128,13 @@ with st.form("chat_form"):
 negResponse = "I'm unable to answer the question based on the information I have from Homecraft dataset."
 if submit_button:
     es = es_connect(cid, cu, cp)
-    resp_products, url_products = search_products(query)
+
     resp_docs, url_docs = search_docs(query)
-    resp_order_items = search_orders(1) # 1 is the hardcoded userid, to simplify this scenario. You should take user_id by user session
-    prompt = f"Answer this question: {query}.\n If product information is requested use the information provided in this JSON: {resp_products} listing the identified products in bullet points with this format: Product name, product key features, price, web url. \n For other questions use the documentation provided in these docs: {resp_docs} and your own knowledge. \n If the question contains requests for user past orders consider the following order list: {resp_order_items}"
+    prompt = f"Answer this question: {query}\n using the information from these docs: {resp_docs}.\n"
     answer = vertexAI(prompt)
 
     if answer.strip() == '':
-        st.write(f"Search Assistant: \n\n{answer.strip()}")
+        st.write(f"Search Assistant: \n\n{answer.strip()}\n\n Reference docs: {url_docs}" )
     else:
-        st.write(f"Search Assistant: \n\n{answer.strip()}\n\n")
+        st.write(f"Search Assistant: \n\n{answer.strip()}\n\n Reference docs: {url_docs}" )
 
