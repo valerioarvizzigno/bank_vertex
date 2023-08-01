@@ -117,7 +117,7 @@ def vertexAI(prompt):
 
 #image = Image.open('homecraft_logo.jpg')
 st.image("https://i.imgur.com/G22hbgZ.png", caption=None)
-st.title("ElastiBank Search Bar")
+st.title("ElastiBank Search")
 
 # Main chat form
 with st.form("chat_form"):
@@ -130,7 +130,7 @@ if submit_button:
     es = es_connect(cid, cu, cp)
 
     resp_docs, url_docs = search_docs(query)
-    prompt = f"Answer this question: {query}\n using the information from these docs: {resp_docs}.\n"
+    prompt = f"Answer this question: {query}\n. Use the information from the following docs: {resp_docs}.\n"
     answer = vertexAI(prompt)
 
     if answer.strip() == '':

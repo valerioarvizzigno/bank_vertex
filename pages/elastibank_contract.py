@@ -120,7 +120,7 @@ negResponse = "I'm unable to answer the question based on the information I have
 if submit_button:
     es = es_connect(cid, cu, cp)
     resp_docs = search_docs(query)
-    prompt = f"Answer this question: {query}. Leverage these docs to find the answer: {resp_docs}"
+    prompt = f"Answer this question: {query}. Leverage the following docs to find the answer: {resp_docs}"
     answer = vertexAI(prompt)
     
     if negResponse in answer:

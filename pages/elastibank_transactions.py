@@ -24,7 +24,7 @@ cp = os.environ['cloud_pass']
 cu = os.environ['cloud_user']
 
 parameters = {
-        "temperature": 0.5,
+        "temperature": 0.4,
         "max_output_tokens": 606,
         "top_p": 0.8,
         "top_k": 40
@@ -120,7 +120,7 @@ negResponse = "I'm unable to answer the question based on the information I have
 if submit_button:
     es = es_connect(cid, cu, cp)
     resp_docs = search_transactions(query)
-    prompt = f"Answer this question: {query}. Leverage these transactions to find the answer: {resp_docs}"
+    prompt = f"Answer these questions: {query}. Leverage the provided transactions to find the answer. Transactions: {resp_docs}"
     answer = vertexAI(prompt)
     
     if negResponse in answer:

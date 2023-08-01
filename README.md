@@ -7,6 +7,8 @@ Queries for the elasticbank_home page:
 
 - list the account types you are offering in bullet points with their key features
 
+- Do you offer car loans? If yes describe their rates and details
+
 For the elasticbank_contract page:
 
 - How does it cost to receive a wire transfer in dollar from the US in my italian bank account?
@@ -19,7 +21,8 @@ for the elasticbank_transactions try those questions:
 
 - Sum all of my spending in transportation last month and List all the related transactions in bullet points
 - List with bullet points all the food and drink transactions. Underline the ones greater than 20 dollars
-- Have I spent any money for drugs?
-- If yes how much? If yes how much?
+- Which transactions are food related? List them in bullet points
+- Have I spent any money for drugs? If yes how much?
+- What's the highest electricity bill I had? Can you please list all the information about this transaction?
 
 Check valerioarvizzigno/homecraft_vertex repo for installation guide. It's the same for both
