@@ -40,14 +40,14 @@ def es_connect(cid, user, passwd):
     return es
 
 # Search ElasticSearch index and return details on relevant products
-def search_docs(query_text):
+def search_transactions(query_text):
 
     # Elasticsearch query (BM25) and kNN configuration for hybrid search
     query = {
         "bool": {
             "must": [{
                 "match": {
-                    "title": {
+                    "transaction_category": {
                         "query": query_text,
                         "boost": 1
                     }
@@ -55,14 +55,14 @@ def search_docs(query_text):
             }],
             "filter": [{
                 "exists": {
-                    "field": "title-vector"
+                    "field": "category-vector"
                 }
             }]
         }
     }
 
     knn = {
-        "field": "title-vector",
+        "field": "category-vector",
         "k": 1,
         "num_candidates": 20,
         "query_vector_builder": {
@@ -74,13 +74,13 @@ def search_docs(query_text):
         "boost": 24
     }
 
-    fields = ["title", "body"]
-    index = 'search-bank-transfers'
+    fields = ["task_id", "transaction_text", "transaction_value", "transaction_type", "transaction_description", "transaction_category"]
+    index = 'search-bank-cctransactions-vector'
     resp = es.search(index=index,
                      query=query,
                      knn=knn,
                      fields=fields,
-                     size=3,
+                     size=30,
                      source=False)
 
     body = resp['hits']['hits']
@@ -119,8 +119,8 @@ with st.form("chat_form"):
 negResponse = "I'm unable to answer the question based on the information I have from Homecraft dataset."
 if submit_button:
     es = es_connect(cid, cu, cp)
-    resp_docs = search_docs(query)
-    prompt = f"Answer this question: {query}. Leverage these docs to find the answer: {resp_docs}"
+    resp_docs = search_transactions(query)
+    prompt = f"Answer this question: {query}. Leverage these transactions to find the answer: {resp_docs}"
     answer = vertexAI(prompt)
     
     if negResponse in answer:
