@@ -1,4 +1,4 @@
-# bank_v
+# GenAI FSI demo with Elastic Vector Search (ESRE) and Google's VertexAI
 FS Demo with ESRE and Google's GenAI
 
 Queries for the elasticbank_home page:
@@ -9,9 +9,11 @@ Queries for the elasticbank_home page:
 
 - Do you offer car loans? If yes describe their rates and details
 
+- What information do you need to properly support me in transaction dispute?
+
 For the elasticbank_contract page:
 
-- How does it cost to receive a wire transfer in dollar from the US in my italian bank account?
+- How much does it cost to receive a wire transfer in dollar from the US in my italian bank account?
 
 - Please list all the related fees and clauses of transferring money from an US dollar bank account to an italian euro bank account
 
