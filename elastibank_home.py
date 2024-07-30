@@ -2,7 +2,7 @@ import os
 import streamlit as st
 from elasticsearch import Elasticsearch
 import vertexai
-from vertexai.language_models import TextGenerationModel
+from vertexai.preview.generative_models import GenerativeModel, ChatSession, GenerationConfig, Image, Part
 
 # This code shows VertexAI GenAI integration with Elastic Vector Search features
 # to connect publicly trained LLMs with private data
@@ -23,16 +23,18 @@ cid = os.environ['cloud_id']
 cp = os.environ['cloud_pass']
 cu = os.environ['cloud_user']
 
-parameters = {
-    "temperature": 0.4, # 0 - 1. The higher the temp the more creative and less on point answers become
-    "max_output_tokens": 606, #modify this number (1 - 1024) for short/longer answers
-    "top_p": 0.8,
-    "top_k": 40
-}
+generation_config = GenerationConfig(
+    temperature=0.4, # 0 - 1. The higher the temp the more creative and less on point answers become
+    max_output_tokens=2048, #modify this number (1 - 1024) for short/longer answers
+    top_p=0.8,
+    top_k=40,
+    candidate_count=1,
+)
 
 vertexai.init(project=projid, location="us-central1")
 
-model = TextGenerationModel.from_pretrained("text-bison@001")
+model = GenerativeModel("gemini-pro")
+visionModel = GenerativeModel("gemini-1.0-pro-vision-001")
 
 # Connect to Elastic Cloud cluster
 def es_connect(cid, user, passwd):
@@ -104,15 +106,11 @@ def truncate_text(text, max_tokens):
 
     return ' '.join(tokens[:max_tokens])
 
-# Generate a response from Text-Bison based on the given prompt
-def vertexAI(prompt):
-    # Truncate the prompt content to fit within the model's context length
-    #truncated_prompt = truncate_text(prompt, max_context_tokens - max_tokens - safety_margin)
-    response = model.predict(
-        prompt,
-        **parameters
+# Generate a response from Gemini based on the given prompt
+def generateResponse(prompt):
+    response = model.generate_content(prompt, 
+                                      generation_config=generation_config
     )
-
     return response.text
 
 #image = Image.open('homecraft_logo.jpg')
@@ -131,7 +129,7 @@ if submit_button:
 
     resp_docs, url_docs = search_docs(query)
     prompt = f"Answer this question: {query}\n. Use the information from the following docs: {resp_docs}.\n"
-    answer = vertexAI(prompt)
+    answer = generateResponse(prompt)
 
     if answer.strip() == '':
         st.write(f"Search Assistant: \n\n{answer.strip()}\n\n Reference docs: {url_docs}" )

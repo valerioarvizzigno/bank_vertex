@@ -2,7 +2,7 @@ import os
 import streamlit as st
 from elasticsearch import Elasticsearch
 import vertexai
-from vertexai.language_models import TextGenerationModel
+from vertexai.preview.generative_models import GenerativeModel, ChatSession, GenerationConfig, Image, Part
 
 #WATCHOUT!!! For fine-tuning feature you need to import vertexai.preview instead of just vertexAI
 
@@ -23,16 +23,18 @@ cid = os.environ['cloud_id']
 cp = os.environ['cloud_pass']
 cu = os.environ['cloud_user']
 
-parameters = {
-        "temperature": 0.4,
-        "max_output_tokens": 606,
-        "top_p": 0.8,
-        "top_k": 40
-    }
+generation_config = GenerationConfig(
+    temperature=0.4, # 0 - 1. The higher the temp the more creative and less on point answers become
+    max_output_tokens=2048, #modify this number (1 - 1024) for short/longer answers
+    top_p=0.8,
+    top_k=40,
+    candidate_count=1,
+)
 
 vertexai.init(project=projid, location="us-central1")
 
-model = TextGenerationModel.from_pretrained("text-bison@001")
+model = GenerativeModel("gemini-pro")
+visionModel = GenerativeModel("gemini-1.0-pro-vision-001")
 
 # Connect to Elastic Cloud cluster
 def es_connect(cid, user, passwd):
@@ -95,15 +97,11 @@ def truncate_text(text, max_tokens):
 
     return ' '.join(tokens[:max_tokens])
 
-# Generate a response from ChatGPT based on the given prompt
-def vertexAI(prompt):
-    # Truncate the prompt content to fit within the model's context length
-    #truncated_prompt = truncate_text(prompt, max_context_tokens - max_tokens - safety_margin)
-    response = model.predict(
-        prompt,
-        **parameters
+# Generate a response from Gemini based on the given prompt
+def generateResponse(prompt):
+    response = model.generate_content(prompt, 
+                                      generation_config=generation_config
     )
-
     return response.text
 
 #image = Image.open('homecraft_logo.jpg')
@@ -116,12 +114,12 @@ with st.form("chat_form"):
     submit_button = st.form_submit_button("Send")
 
 # Generate and display response on form submission
-negResponse = "I'm unable to answer the question based on the information I have from Homecraft dataset."
+negResponse = "I'm unable to answer the question based on the information I have from dataset."
 if submit_button:
     es = es_connect(cid, cu, cp)
     resp_docs = search_transactions(query)
     prompt = f"Answer these questions: {query}. Leverage the provided transactions to find the answer. Transactions: {resp_docs}"
-    answer = vertexAI(prompt)
+    answer = generateResponse(prompt)
     
     if negResponse in answer:
         st.write(f"Search Assistant: \n\n{answer.strip()}")

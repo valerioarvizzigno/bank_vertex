@@ -27,6 +27,8 @@ For the elasticbank_contract page:
 
 for the elasticbank_transactions try those questions:
 
+- Please list all transactions for rideshare/taxis and their details. Highlight what the vendor was
+- What's the highest electricity bill I had? Can you please list all the information about this transaction?
 - Sum all of my spending in transportation last month and List all the related transactions in bullet points
 - List with bullet points all the food and drink transactions. Underline the ones greater than 20 dollars
 - Which transactions are food related? List them in bullet points
