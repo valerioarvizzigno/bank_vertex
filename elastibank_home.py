@@ -33,8 +33,7 @@ generation_config = GenerationConfig(
 
 vertexai.init(project=projid, location="us-central1")
 
-model = GenerativeModel("gemini-pro")
-visionModel = GenerativeModel("gemini-1.0-pro-vision-001")
+model = GenerativeModel("gemini-2.0-flash-exp")
 
 # Connect to Elastic Cloud cluster
 def es_connect(cid, user, passwd):

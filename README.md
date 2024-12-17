@@ -1,5 +1,5 @@
 # GenAI FSI demo with Elastic Vector Search (ESRE) and Google's VertexAI
-FS Demo with ESRE and Google's GenAI
+FS Demo with ESRE and Google's GenAI - Updated to use Gemini 2.0 Flash
 
 Data source used:
 - Your favourite bank website, web-crawled via Elastic Enterprise Search --> used for general information queries on elastibank_home.py
